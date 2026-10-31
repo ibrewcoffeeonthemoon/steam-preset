@@ -5,6 +5,7 @@ from threading import Thread
 from evdev import InputDevice, UInput, list_devices
 from evdev import ecodes as e
 
+from .log import logger
 from .types import KeyMap, KeyMapper
 
 
@@ -24,7 +25,7 @@ def _worker(
                 continue
         return None
     if not (source_dev := find_source_device(source)):
-        print(f"error: device '{source}' not found", file=sys.stderr)
+        logger.error(f"device '{source}' not found")
         sys.exit(1)
 
     # create target device
@@ -32,7 +33,7 @@ def _worker(
 
     # grab the source device
     source_dev.grab()
-    print(f"[ grabbed ] '{source_dev.name}' for taiko remapping", file=sys.stderr)
+    logger.info(f"[ grabbed ] '{source_dev.name}' for taiko remapping")
 
     # rewrite source device key events to target device if it is defined in key_map
     try:
@@ -46,11 +47,11 @@ def _worker(
     finally:
         try:
             source_dev.ungrab()
-            print(f"[ ungrabbed ] '{source_dev.name}' for taiko remapping", file=sys.stderr)
+            logger.info(f"[ ungrabbed ] '{source_dev.name}' for taiko remapping")
         except OSError:
             pass
         target_dev.close()
-        print('remapper process terminated, device ungrabbed', file=sys.stderr)
+        logger.info('remapper process terminated, device ungrabbed')
 
 
 def remap(key_mapper: KeyMapper) -> None:
