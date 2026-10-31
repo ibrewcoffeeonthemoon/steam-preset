@@ -10,7 +10,8 @@ from typing import Annotated
 import typer
 from typer import Argument, Exit, Option
 
-from . import artwork, default_preset, inputs
+from . import artwork, inputs
+from .presets import default as default_preset
 from .types import (
     Arg,
     Arg_,
