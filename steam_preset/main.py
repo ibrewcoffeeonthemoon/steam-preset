@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 import logging
 import os
 import pkgutil
@@ -42,19 +43,32 @@ def discover_presets() -> Registry:
     registry: Registry = {}
 
     # iterate through all python modules in the presets package
-    preset_search_paths = [str(Path.home()/'.config/workspace/steam-preset/presets'), ]
-    for _, module_name, _ in pkgutil.iter_modules(preset_search_paths):
-        # resolve full name
-        full_name = f'presets.{module_name}'
+    presets_dir = Path.home() / '.config/workspace/steam-preset/presets'
+    if not presets_dir.is_dir():
+        return registry
 
-        # try import the module
-        module = importlib.import_module(full_name)
-        logger.debug(f'Imported {module}')
+    # convert Path to string for pkgutil
+    for _, module_name, _ in pkgutil.iter_modules([str(presets_dir)]):
+        file_path = presets_dir / f'{module_name}.py'
 
-        # register module by its key attribute if defined
-        if isinstance(module, Preset):
-            registry[str(module.key)] = module
-            logger.info(f'Discovered {module}')
+        # dynamically load the module from file path
+        try:
+            spec = importlib.util.spec_from_file_location(
+                f'presets.{module_name}', file_path
+            )
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                logger.debug(f'Imported {module}')
+
+                # register module by its key attribute if defined
+                if isinstance(module, Preset):
+                    registry[str(module.key)] = module
+                    logger.info(f'Discovered {module}')
+        except ImportError as e:
+            logger.error(f'Failed to import preset {file_path.name}: {e}')
+        except Exception as e:
+            logger.error(f'Unexpected error loading preset {file_path.name}: {e}')
     #
     return registry
 
