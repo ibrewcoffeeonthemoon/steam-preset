@@ -1,14 +1,12 @@
 import importlib
 import importlib.util
-import logging
 import pkgutil
 from pathlib import Path
 
+from steam_preset.log import logger
 from steam_preset.types import Preset
 
 Registry = dict[str, Preset]
-
-logger = logging.getLogger('steam-preset')
 
 
 def discover_presets() -> Registry:

@@ -1,4 +1,3 @@
-import logging
 import os
 import subprocess as sh
 from typing import Annotated
@@ -7,6 +6,7 @@ import typer
 from typer import Argument, Exit, Option
 
 from . import artwork, inputs
+from .log import logger
 from .presets import default as default_preset
 from .presets.discovery import discover_presets
 from .types import (
@@ -23,9 +23,6 @@ from .types import (
     Wrapper,
     Wrapper_,
 )
-
-logging.basicConfig(level=logging.INFO, format='[ %(name)s ]: %(levelname)s: %(message)s')
-logger = logging.getLogger('steam-preset')
 
 app = typer.Typer(
     name='steam-preset',
