@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import subprocess as sh
 from pathlib import Path
 from typing import Self
@@ -27,12 +28,13 @@ class Game:
         self._spec = Spec(steam_cmd, self._preset)
         self._artwork_id = artwork_id
         # proc
+        self._key_mapper_proc: mp.Process | None = None
         self._game_proc: sh.Popen | None = None
 
     def _run_key_mapper(self) -> None:
         # run the key mapper if exists
         if isinstance(self._preset, PresetWithKeyMapper):
-            inputs.remap(self._preset.key_mapper)
+            self._key_mapper_proc = inputs.remap(self._preset.key_mapper)
             logger.info(f'{self._preset.key_mapper=}')
 
     def _run_init(self) -> None:
@@ -52,6 +54,10 @@ class Game:
         return self
 
     def __exit__(self, *_) -> None:
+        # quit the key mapper proc gracefully
+        if self._key_mapper_proc:
+            logger.warning('terminating key mapper process ...')
+            self._key_mapper_proc.terminate()
         # quit the game proc gracefully
         if self._game_proc:
             logger.warning('terminating game process ...')
