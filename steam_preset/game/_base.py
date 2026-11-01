@@ -26,6 +26,8 @@ class Game:
         self._preset = registry.get(preset_key)
         self._spec = Spec(steam_cmd, self._preset)
         self._artwork_id = artwork_id
+        # proc
+        self._game_proc: sh.Popen | None = None
 
     def _run_key_mapper(self) -> None:
         # run the key mapper if exists
@@ -50,8 +52,11 @@ class Game:
         return self
 
     def __exit__(self, *_) -> None:
-        pass
+        # quit the game proc gracefully
+        if self._game_proc:
+            logger.warning('terminating game process ...')
+            self._game_proc.terminate()
 
     def run(self) -> None:
-        game_proc = sh.Popen(self._spec.cmd, env=self._spec.env)
-        game_proc.wait()
+        self._game_proc = sh.Popen(self._spec.cmd, env=self._spec.env)
+        self._game_proc.wait()

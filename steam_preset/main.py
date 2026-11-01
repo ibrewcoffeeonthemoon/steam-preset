@@ -6,6 +6,8 @@ from typer import Argument, Option
 
 from steam_preset.game import Game
 
+from .log import logger
+
 DEFAULT_PRESETS_DIR = Path.home() / '.config/workspace/steam-preset/presets'
 
 app = typer.Typer(
@@ -32,5 +34,8 @@ def main(
 ) -> None:
     # Game
     with Game(steam_cmd, preset_key, artwork_id, presets_dir) as game:
-        # run the game
-        game.run()
+        try:
+            # run the game
+            game.run()
+        except KeyboardInterrupt:
+            logger.warning('User press Ctrl-C, KeyboardInterrupt received, steam-preset is quitting ...')
