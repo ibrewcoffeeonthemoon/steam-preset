@@ -19,7 +19,7 @@ class KeyMapper(TypedDict):
     key_map: KeyMap
 
 
-__all__ = ['Env_', 'Env', 'Wrapper_', 'Wrapper', 'Arg_', 'Arg', 'Cmd', 'KeyMapper',]
+__all__ = ['Preset', 'Env_', 'Env', 'Wrapper_', 'Wrapper', 'Arg_', 'Arg', 'Cmd', 'KeyMapper',]
 
 
 @runtime_checkable
