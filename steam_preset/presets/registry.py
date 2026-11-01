@@ -34,7 +34,7 @@ class Registry:
                     # register module by its key attribute if defined
                     if isinstance(module, Preset):
                         self._data[str(module.key)] = module
-                        logger.info(f'Discovered {module}')
+                        logger.debug(f'Discovered {module}')
             except ImportError as e:
                 logger.error(f'Failed to import preset {file_path.name}: {e}')
             except Exception as e:
@@ -48,9 +48,9 @@ class Registry:
         # load preset
         preset = self._data.get(key)
         if preset is None:
-            logger.warning('No preset is loaded, steam-preset has no effect')
+            logger.warning('No preset is loaded, using the default preset')
         else:
-            logger.debug(f'Preset loaded from registry: {preset=}')
+            logger.info(f'Preset loaded from registry: {preset=}')
 
         #
         return preset

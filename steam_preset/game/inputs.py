@@ -1,6 +1,6 @@
 import os
 import sys
-from threading import Thread
+from multiprocessing import Process
 
 from evdev import InputDevice, UInput, list_devices
 from evdev import ecodes as e
@@ -35,31 +35,23 @@ def _worker(
     # grab the source device
     source_dev.grab()
     logger.info(f"[ grabbed ] '{source_dev.name}' for taiko remapping")
-    notify.send('steam-preset: key mapper enabled', f"[ grabbed ] '{source_dev.name}' for taiko remapping")
+    notify.send('Enabled Key Mapper', f"steam-preset grabbed '{source_dev.name}' for key mapping")
 
-    # rewrite source device key events to target device if it is defined in key_map
-    try:
-        for event in source_dev.read_loop():
-            if event.type == e.EV_KEY:
-                out_code = key_map.get(event.code, event.code)
-                target_dev.write(e.EV_KEY, out_code, event.value)
-                target_dev.write(e.EV_SYN, e.SYN_REPORT, 0)
-            elif event.type == e.EV_MSC:
-                target_dev.write(e.EV_MSC, event.code, event.value)
-    finally:
-        try:
-            source_dev.ungrab()
-            logger.info(f"[ ungrabbed ] '{source_dev.name}' for taiko remapping")
-            notify.send('steam-preset: key mapper disabled', f"[ ungrabbed ] '{source_dev.name}' for taiko remapping")
-        except OSError:
-            pass
-        target_dev.close()
-        logger.info('remapper process terminated, device ungrabbed')
+    # rewrite source device key events to target device
+    for event in source_dev.read_loop():
+        if event.type == e.EV_KEY:
+            out_code = key_map.get(event.code, event.code)
+            target_dev.write(e.EV_KEY, out_code, event.value)
+            target_dev.write(e.EV_SYN, e.SYN_REPORT, 0)
+        elif event.type == e.EV_MSC:
+            target_dev.write(e.EV_MSC, event.code, event.value)
 
 
-def remap(key_mapper: KeyMapper) -> None:
+def remap(key_mapper: KeyMapper) -> Process:
     source = key_mapper['source']
     key_map = key_mapper['key_map']
     app_id = os.environ.get('SteamAppId', 'default')
     target = key_mapper.get('target', f'steam-preset-{app_id}')
-    Thread(target=_worker, args=(source, target, key_map), daemon=True).start()
+    proc = Process(target=_worker, args=(source, target, key_map), daemon=True)
+    proc.start()
+    return proc

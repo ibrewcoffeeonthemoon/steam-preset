@@ -6,6 +6,8 @@ from typer import Argument, Option
 
 from steam_preset.game import Game
 
+from .log import LogLevel, logger
+
 DEFAULT_PRESETS_DIR = Path.home() / '.config/workspace/steam-preset/presets'
 
 app = typer.Typer(
@@ -29,8 +31,15 @@ def main(
     preset_key: Annotated[str | None, Option('--key', help='Custom preset key to match against registry entries, overrides Steam app-id matching.',), ] = None,
     artwork_id: Annotated[str | None, Option('--artwork', help='The app-id used to fetch artwork and icon')] = None,
     presets_dir: Annotated[Path, Option('--presets-dir', help='Directory path containing presets')] = DEFAULT_PRESETS_DIR,
+    log_level: Annotated[LogLevel, Option('--log-level', help='Set the logging verbosity level.', case_sensitive=False)] = LogLevel.INFO,
 ) -> None:
+    # config logger
+    logger.setLevel(log_level.value)
+
     # Game
     with Game(steam_cmd, preset_key, artwork_id, presets_dir) as game:
-        # run the game
-        game.run()
+        try:
+            # run the game
+            game.run()
+        except KeyboardInterrupt:
+            logger.warning('User press Ctrl-C, KeyboardInterrupt received, steam-preset is quitting ...')
