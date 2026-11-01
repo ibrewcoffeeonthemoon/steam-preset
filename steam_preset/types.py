@@ -1,5 +1,8 @@
 from typing import NotRequired, Protocol, TypedDict, runtime_checkable
 
+#
+# suffix with '_' is non-str types, non-suffix version is the pure str type
+#
 Env_ = dict[str, str | int]
 Env = dict[str, str]
 Wrapper_ = list[str | int]
