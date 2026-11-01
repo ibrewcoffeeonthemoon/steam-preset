@@ -5,12 +5,10 @@ from typing import Self
 from typer import Exit
 
 from steam_preset import artwork, inputs
+from steam_preset.log import logger
+from steam_preset.presets import default as default_preset
 from steam_preset.presets.discovery import discover_presets
-
-from .log import logger
-from .presets import default as default_preset
-from .types import *
-from .types import (
+from steam_preset.types import (
     PresetConfigurable,
     PresetInitializable,
     PresetWithArg,
@@ -45,12 +43,12 @@ class Game:
             logger.debug(f'Preset loaded from registry: {preset=}')
 
         # load preset extras
-        preset_env_: Env_ = preset.env.copy() if isinstance(preset, PresetWithEnv) else default_preset.env
-        preset_env: Env = {str(k): str(v) for k, v in preset_env_.items()}
-        preset_wrapper_: Wrapper_ = preset.wrapper.copy() if isinstance(preset, PresetWithWrapper) else default_preset.wrapper
-        preset_wrapper: Wrapper = [str(v) for v in preset_wrapper_]
-        preset_arg_: Arg_ = preset.arg.copy() if isinstance(preset, PresetWithArg) else default_preset.arg
-        preset_arg: Arg = [str(v) for v in preset_arg_]
+        preset_env_ = preset.env.copy() if isinstance(preset, PresetWithEnv) else default_preset.env
+        preset_env = {str(k): str(v) for k, v in preset_env_.items()}
+        preset_wrapper_ = preset.wrapper.copy() if isinstance(preset, PresetWithWrapper) else default_preset.wrapper
+        preset_wrapper = [str(v) for v in preset_wrapper_]
+        preset_arg_ = preset.arg.copy() if isinstance(preset, PresetWithArg) else default_preset.arg
+        preset_arg = [str(v) for v in preset_arg_]
         logger.info(f'{preset_env=}')
         logger.info(f'{preset_wrapper=}')
         logger.info(f'{preset_arg=}')
