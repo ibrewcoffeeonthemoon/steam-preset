@@ -9,7 +9,7 @@ from steam_preset.types import Preset
 Registry = dict[str, Preset]
 
 
-def discover_presets() -> Registry:
+def scan() -> Registry:
     #
     registry: Registry = {}
 

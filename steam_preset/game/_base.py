@@ -6,7 +6,7 @@ from typer import Exit
 
 from steam_preset.game.spec import Spec
 from steam_preset.log import logger
-from steam_preset.presets.discovery import discover_presets
+from steam_preset.presets import registry
 from steam_preset.types import (
     PresetInitializable,
     PresetWithKeyMapper,
@@ -34,8 +34,7 @@ class Game:
         logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
 
         # discover presets dynamically and pick by matching key
-        registry = discover_presets()
-        self._preset = preset = registry.get(key)
+        self._preset = preset = registry.scan().get(key)
         if preset is None:
             logger.warning('No preset is loaded, steam-preset has no effect')
         else:
