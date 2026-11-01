@@ -5,6 +5,8 @@ from threading import Thread
 from evdev import InputDevice, UInput, list_devices
 from evdev import ecodes as e
 
+from steam_preset import notify
+
 from .log import logger
 from .types import KeyMap, KeyMapper
 
@@ -34,6 +36,7 @@ def _worker(
     # grab the source device
     source_dev.grab()
     logger.info(f"[ grabbed ] '{source_dev.name}' for taiko remapping")
+    notify.send('steam-preset: key mapper enabled', f"[ grabbed ] '{source_dev.name}' for taiko remapping")
 
     # rewrite source device key events to target device if it is defined in key_map
     try:
@@ -48,6 +51,7 @@ def _worker(
         try:
             source_dev.ungrab()
             logger.info(f"[ ungrabbed ] '{source_dev.name}' for taiko remapping")
+            notify.send('steam-preset: key mapper disabled', f"[ ungrabbed ] '{source_dev.name}' for taiko remapping")
         except OSError:
             pass
         target_dev.close()
