@@ -4,7 +4,7 @@ from typing import Self
 
 from typer import Exit
 
-from steam_preset import artwork, inputs
+from steam_preset import inputs
 from steam_preset.log import logger
 from steam_preset.presets import default as default_preset
 from steam_preset.presets.discovery import discover_presets
@@ -16,6 +16,8 @@ from steam_preset.types import (
     PresetWithKeyMapper,
     PresetWithWrapper,
 )
+
+from . import artwork
 
 
 class Game:
