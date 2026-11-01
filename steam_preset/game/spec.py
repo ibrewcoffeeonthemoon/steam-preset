@@ -1,5 +1,7 @@
 import os
 
+from typer import Exit
+
 from steam_preset.log import logger
 from steam_preset.presets import default as default_preset
 from steam_preset.types import (
@@ -14,9 +16,14 @@ from steam_preset.types import (
 class Spec:
     def __init__(
         self,
-        steam_cmd: list[str],
+        steam_cmd: list[str] | None,
         preset: Preset | None,
     ) -> None:
+        # extract %command%
+        if steam_cmd is None:
+            logger.error('No %command% detected. Use `steam-preset %command%` as launch options.')
+            raise Exit(code=1)
+
         # load preset extras
         preset_env_ = preset.env.copy() if isinstance(preset, PresetWithEnv) else default_preset.env
         preset_env = {str(k): str(v) for k, v in preset_env_.items()}

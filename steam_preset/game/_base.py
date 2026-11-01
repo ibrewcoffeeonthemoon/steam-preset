@@ -2,8 +2,6 @@ import subprocess as sh
 from pathlib import Path
 from typing import Self
 
-from typer import Exit
-
 from steam_preset.game.spec import Spec
 from steam_preset.log import logger
 from steam_preset.presets.registry import Registry
@@ -22,19 +20,12 @@ class Game:
         preset_key: str | None,
         artwork_id: str | None,
     ) -> None:
-        self._artwork_id = artwork_id
-
-        # extract %command%
-        if steam_cmd is None:
-            logger.error('No %command% detected. Use `steam-preset %command%` as launch options.')
-            raise Exit(code=1)
-
         # discover presets dynamically and pick by matching key
-        registry = Registry(presets_dir=Path.home() / '.config/workspace/steam-preset/presets')
+        presets_dir = Path.home()/'.config/workspace/steam-preset/presets'
+        registry = Registry(presets_dir)
         self._preset = registry.get(preset_key)
-
-        # spec
         self._spec = Spec(steam_cmd, self._preset)
+        self._artwork_id = artwork_id
 
     def _run_key_mapper(self) -> None:
         # run the key mapper if exists
