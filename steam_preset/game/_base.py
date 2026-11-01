@@ -1,12 +1,13 @@
 import os
 import subprocess as sh
+from pathlib import Path
 from typing import Self
 
 from typer import Exit
 
 from steam_preset.game.spec import Spec
 from steam_preset.log import logger
-from steam_preset.presets import registry
+from steam_preset.presets.registry import Registry
 from steam_preset.types import (
     PresetInitializable,
     PresetWithKeyMapper,
@@ -34,14 +35,11 @@ class Game:
         logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
 
         # discover presets dynamically and pick by matching key
-        self._preset = preset = registry.scan().get(key)
-        if preset is None:
-            logger.warning('No preset is loaded, steam-preset has no effect')
-        else:
-            logger.debug(f'Preset loaded from registry: {preset=}')
+        registry = Registry(presets_dir=Path.home() / '.config/workspace/steam-preset/presets')
+        self._preset = registry.get(key)
 
         # spec
-        self._spec = Spec(steam_cmd, preset)
+        self._spec = Spec(steam_cmd, self._preset)
 
     def _run_key_mapper(self) -> None:
         # run the key mapper if exists
