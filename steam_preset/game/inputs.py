@@ -35,7 +35,7 @@ def _worker(
     # grab the source device
     source_dev.grab()
     logger.info(f"[ grabbed ] '{source_dev.name}' for taiko remapping")
-    notify.send('steam-preset: key mapper enabled', f"[ grabbed ] '{source_dev.name}' for taiko remapping")
+    notify.send('Enabled Key Mapper', f"steam-preset grabbed '{source_dev.name}' for key mapping")
 
     # rewrite source device key events to target device
     for event in source_dev.read_loop():

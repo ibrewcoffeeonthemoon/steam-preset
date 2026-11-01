@@ -3,6 +3,7 @@ import subprocess as sh
 from pathlib import Path
 from typing import Self
 
+from steam_preset import notify
 from steam_preset.log import logger
 from steam_preset.presets.registry import Registry
 from steam_preset.types import (
@@ -54,14 +55,19 @@ class Game:
         return self
 
     def __exit__(self, *_) -> None:
-        # quit the key mapper proc gracefully
-        if self._key_mapper_proc:
-            logger.warning('terminating key mapper process ...')
-            self._key_mapper_proc.terminate()
         # quit the game proc gracefully
         if self._game_proc:
             logger.warning('terminating game process ...')
             self._game_proc.terminate()
+            self._game_proc.wait()
+            logger.info('terminated game process')
+        # quit the key mapper proc gracefully
+        if self._key_mapper_proc:
+            logger.warning('terminating key mapper process ...')
+            self._key_mapper_proc.terminate()
+            self._key_mapper_proc.join()
+            logger.info('terminated key mapper process')
+            notify.send('Disabled Key Mapper', 'steam-preset key mapper restored input device')
 
     def run(self) -> None:
         self._game_proc = sh.Popen(self._spec.cmd, env=self._spec.env)
