@@ -1,5 +1,6 @@
 import importlib
 import importlib.util
+import os
 import pkgutil
 from pathlib import Path
 
@@ -39,10 +40,17 @@ class Registry:
             except Exception as e:
                 logger.error(f'Unexpected error loading preset {file_path.name}: {e}')
 
-    def get(self, key: str) -> Preset | None:
+    def get(self, preset_key: str | None) -> Preset | None:
+        # parse key
+        key = preset_key or os.environ.get('SteamAppId', 'default')
+        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
+
+        # load preset
         preset = self._data.get(key)
         if preset is None:
             logger.warning('No preset is loaded, steam-preset has no effect')
         else:
             logger.debug(f'Preset loaded from registry: {preset=}')
+
+        #
         return preset

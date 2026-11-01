@@ -1,4 +1,3 @@
-import os
 import subprocess as sh
 from pathlib import Path
 from typing import Self
@@ -30,13 +29,9 @@ class Game:
             logger.error('No %command% detected. Use `steam-preset %command%` as launch options.')
             raise Exit(code=1)
 
-        # parse key
-        key = preset_key or os.environ.get('SteamAppId', 'default')
-        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
-
         # discover presets dynamically and pick by matching key
         registry = Registry(presets_dir=Path.home() / '.config/workspace/steam-preset/presets')
-        self._preset = registry.get(key)
+        self._preset = registry.get(preset_key)
 
         # spec
         self._spec = Spec(steam_cmd, self._preset)
