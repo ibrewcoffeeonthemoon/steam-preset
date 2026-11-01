@@ -1,7 +1,16 @@
 import logging
 import os
 import sys
+from enum import Enum
 from logging import Formatter, LogRecord, StreamHandler
+
+
+class LogLevel(str, Enum):
+    DEBUG = 'DEBUG'
+    INFO = 'INFO'
+    WARNING = 'WARNING'
+    ERROR = 'ERROR'
+    CRITICAL = 'CRITICAL'
 
 
 # decode raw environment variable
