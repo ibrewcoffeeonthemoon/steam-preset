@@ -26,6 +26,8 @@ class Game:
         preset_key: str | None,
         artwork_id: str | None,
     ) -> None:
+        self._artwork_id = artwork_id
+
         # extract %command%
         if steam_cmd is None:
             logger.error('No %command% detected. Use `steam-preset %command%` as launch options.')
@@ -37,7 +39,7 @@ class Game:
 
         # discover presets dynamically and pick by matching key
         registry = discover_presets()
-        preset = registry.get(key)
+        self._preset = preset = registry.get(key)
         if preset is None:
             logger.warning('No preset is loaded, steam-preset has no effect')
         else:
@@ -64,20 +66,26 @@ class Game:
         logger.debug(f'{self.env=}')
         logger.info(f'{self.cmd=}')
 
+    def _run_key_mapper(self) -> None:
         # run the key mapper if exists
-        if isinstance(preset, PresetWithKeyMapper):
-            inputs.remap(preset.key_mapper)
-            logger.info(f'{preset.key_mapper=}')
+        if isinstance(self._preset, PresetWithKeyMapper):
+            inputs.remap(self._preset.key_mapper)
+            logger.info(f'{self._preset.key_mapper=}')
 
+    def _run_init(self) -> None:
         # run the init script if exists
-        if isinstance(preset, PresetInitializable):
+        if isinstance(self._preset, PresetInitializable):
             logger.info(f'running preset init function ...')
-            preset.init()
+            self._preset.init()
 
+    def _download_artwork(self) -> None:
         # download artwork if necessary
-        artwork.download_if_necessary(artwork_id)
+        artwork.download_if_necessary(self._artwork_id)
 
     def __enter__(self) -> Self:
+        self._download_artwork()
+        self._run_key_mapper()
+        self._run_init()
         return self
 
     def __exit__(self, *_) -> None:
