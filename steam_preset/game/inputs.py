@@ -1,6 +1,6 @@
 import os
 import sys
-from threading import Thread
+from multiprocessing import Process
 
 from evdev import InputDevice, UInput, list_devices
 from evdev import ecodes as e
@@ -57,9 +57,11 @@ def _worker(
         logger.info('remapper process terminated, device ungrabbed')
 
 
-def remap(key_mapper: KeyMapper) -> None:
+def remap(key_mapper: KeyMapper) -> Process:
     source = key_mapper['source']
     key_map = key_mapper['key_map']
     app_id = os.environ.get('SteamAppId', 'default')
     target = key_mapper.get('target', f'steam-preset-{app_id}')
-    Thread(target=_worker, args=(source, target, key_map), daemon=True).start()
+    proc = Process(target=_worker, args=(source, target, key_map), daemon=True)
+    proc.start()
+    return proc
