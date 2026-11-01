@@ -22,7 +22,7 @@ def _get_color(env_var: str) -> str:
 # logging formatter
 class _EnvColorFormatter(Formatter):
     reset = _get_color('RESET')
-    format_str = '[ %(name)s ]: %(levelname)s: %(message)s'
+    format_str = '%(name)s: %(levelname)s: %(message)s'
     colors = {
         logging.DEBUG: _get_color('BLUE'),
         logging.INFO: _get_color('GREEN'),
