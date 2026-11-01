@@ -2,7 +2,6 @@ import subprocess as sh
 from pathlib import Path
 from typing import Self
 
-from steam_preset.game.spec import Spec
 from steam_preset.log import logger
 from steam_preset.presets.registry import Registry
 from steam_preset.types import (
@@ -11,6 +10,7 @@ from steam_preset.types import (
 )
 
 from . import artwork, inputs
+from .spec import Spec
 
 
 class Game:
@@ -19,9 +19,9 @@ class Game:
         steam_cmd: list[str] | None,
         preset_key: str | None,
         artwork_id: str | None,
+        presets_dir: Path,
     ) -> None:
         # discover presets dynamically and pick by matching key
-        presets_dir = Path.home()/'.config/workspace/steam-preset/presets'
         registry = Registry(presets_dir)
         self._preset = registry.get(preset_key)
         self._spec = Spec(steam_cmd, self._preset)
