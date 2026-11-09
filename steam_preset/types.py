@@ -1,13 +1,14 @@
+from pathlib import Path
 from typing import NotRequired, Protocol, TypedDict, runtime_checkable
 
 #
 # suffix with '_' is non-str types, non-suffix version is the pure str type
 #
-Env_ = dict[str, str | int]
+Env_ = dict[str, str | int | Path]
 Env = dict[str, str]
-Wrapper_ = list[str | int]
+Wrapper_ = list[str | int | Path]
 Wrapper = list[str]
-Arg_ = list[str | int]
+Arg_ = list[str | int | Path]
 Arg = list[str]
 Cmd = list[str]
 KeyMap = dict[int, int]
