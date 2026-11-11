@@ -12,15 +12,15 @@ class FocusedScreen:
             check=True,
         )
         data: dict = json.loads(result.stdout)
-        self.name = cast(str, data.get('name', ''))
-        self.make = cast(str, data.get('make', ''))
-        self.model = cast(str, data.get('model', ''))
+        self.name = str(data.get('name', ''))
+        self.make = str(data.get('make', ''))
+        self.model = str(data.get('model', ''))
         mode_id = cast(int, data.get('current_mode'))
         modes = cast(list[dict], data.get('modes'))
         mode = modes[mode_id]
-        self.width = cast(int, mode.get('width'))
-        self.height = cast(int, mode.get('height'))
-        self.refresh_rate = cast(int, mode.get('refresh_rate'))
+        self.width = str(mode.get('width'))
+        self.height = str(mode.get('height'))
+        self.refresh_rate = str(mode.get('refresh_rate'))
         #
         return self
 
