@@ -5,7 +5,7 @@ from typing import cast
 
 
 @dataclass
-class Screen:
+class Output:
     name: str
     make: str
     model: str
@@ -14,7 +14,7 @@ class Screen:
     refresh_rate: str
 
 
-def focused_screen() -> Screen:
+def focused_output() -> Output:
     result = sh.run(
         ['niri', 'msg', '-j', 'focused-output'],
         capture_output=True,
@@ -25,7 +25,7 @@ def focused_screen() -> Screen:
     mode_id = cast(int, data.get('current_mode'))
     modes = cast(list[dict], data.get('modes'))
     mode = modes[mode_id]
-    return Screen(
+    return Output(
         name=str(data.get('name', '')),
         make=str(data.get('make', '')),
         model=str(data.get('model', '')),

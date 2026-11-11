@@ -1,3 +1,3 @@
-from .niri import focused_screen as focused_screen
+from .niri import focused_output as focused_output
 from .path import *
 from .types import *
