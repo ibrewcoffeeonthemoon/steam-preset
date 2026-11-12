@@ -5,7 +5,8 @@ import pkgutil
 from pathlib import Path
 
 from steam_preset.log import logger
-from steam_preset.types import Preset
+
+from .preset import Preset
 
 
 class Registry:
@@ -29,7 +30,8 @@ class Registry:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
                     logger.debug(f'Imported {module}')
-                    return module
+                    preset = Preset.model_validate(vars(module))
+                    return preset
 
         # if no preset is found, steam-preset launcher will crash and the game won't run
         raise ImportError(f'Failed to import any preset for the key `{key}`')
