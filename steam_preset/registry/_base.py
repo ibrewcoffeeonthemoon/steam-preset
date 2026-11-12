@@ -8,6 +8,8 @@ from steam_preset.log import logger
 
 from .preset import Preset
 
+__all__ = ['Registry']
+
 
 class Registry:
     def __init__(self, presets_dir: Path) -> None:

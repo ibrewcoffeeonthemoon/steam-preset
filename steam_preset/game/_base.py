@@ -10,6 +10,8 @@ from steam_preset.registry import Registry
 from . import artwork, inputs
 from .spec import Spec
 
+__all__ = ['Game']
+
 
 class Game:
     def __init__(

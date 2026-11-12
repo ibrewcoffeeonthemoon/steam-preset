@@ -7,7 +7,7 @@ from evdev import ecodes as e
 
 from steam_preset import notify
 from steam_preset.log import logger
-from steam_preset.registry.preset import KeyMap, KeyMapper
+from steam_preset.registry import KeyMap, KeyMapper
 
 
 def _worker(
