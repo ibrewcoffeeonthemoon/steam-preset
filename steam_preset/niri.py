@@ -1,35 +1,38 @@
-import json
 import subprocess as sh
-from dataclasses import dataclass
-from typing import cast
+
+from pydantic import BaseModel
 
 
-@dataclass
-class Output:
+class Output(BaseModel):
     name: str
     make: str
     model: str
-    width: str
-    height: str
-    refresh_rate: str
+    current_mode: int
+
+    class Mode(BaseModel):
+        width: int
+        height: int
+        refresh_rate: int
+    modes: list[Mode]
+
+    @property
+    def width(self) -> str:
+        return str(self.modes[self.current_mode].width)
+
+    @property
+    def height(self) -> str:
+        return str(self.modes[self.current_mode].height)
+
+    @property
+    def refresh_rate(self) -> str:
+        return str(self.modes[self.current_mode].refresh_rate)
 
 
 def focused_output() -> Output:
-    result = sh.run(
-        ['niri', 'msg', '-j', 'focused-output'],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    data: dict = json.loads(result.stdout)
-    mode_id = cast(int, data.get('current_mode'))
-    modes = cast(list[dict], data.get('modes'))
-    mode = modes[mode_id]
-    return Output(
-        name=str(data.get('name', '')),
-        make=str(data.get('make', '')),
-        model=str(data.get('model', '')),
-        width=str(mode.get('width')),
-        height=str(mode.get('height')),
-        refresh_rate=str(mode.get('refresh_rate')),
-    )
+    # use niri msg to fetch info of the focused output, fail on shell exit non zero
+    cmd = ['niri', 'msg', '-j', 'focused-output']
+    stdout = sh.run(cmd, capture_output=True, check=True).stdout
+
+    # return Output as a validated model
+    output = Output.model_validate_json(stdout)
+    return output
