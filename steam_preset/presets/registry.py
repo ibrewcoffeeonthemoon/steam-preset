@@ -13,12 +13,13 @@ class Registry:
         self.presets_dir = presets_dir
 
     def _load_preset(self, key: str) -> Preset | None:
-        # convert Path to string for pkgutil
+        # loop through the presets dir for python files
         for _, module_name, _ in pkgutil.iter_modules([str(self.presets_dir)]):
             file_path = self.presets_dir / f'{module_name}.py'
 
-            # dynamically load the module from file path
+            # import the python file if it match the key
             try:
+                # using double underscore as delimiter and look for key match in the filename directly
                 if key in module_name.split('__'):
                     spec = importlib.util.spec_from_file_location(
                         f'presets.{module_name}', file_path
@@ -27,11 +28,7 @@ class Registry:
                         module = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(module)
                         logger.debug(f'Imported {module}')
-
-                        # return module by its key attribute if defined
-                        if isinstance(module, Preset):
-                            logger.debug(f'Discovered {module}')
-                            return module
+                        return module
 
             except ImportError as e:
                 logger.error(f'Failed to import preset {file_path.name}: {e}')

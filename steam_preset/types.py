@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import ModuleType
 from typing import NotRequired, Protocol, TypedDict, runtime_checkable
 
 #
@@ -23,38 +24,35 @@ class KeyMapper(TypedDict):
 __all__ = ['Preset', 'Env_', 'Env', 'Wrapper_', 'Wrapper', 'Arg_', 'Arg', 'Cmd', 'KeyMapper',]
 
 
-@runtime_checkable
-class Preset(Protocol):
-    # uniquely identify a Steam game
-    # could be provided via the --key flag, or fall back to steam app id
-    key: int | str
+# Preset is just a module type
+Preset = ModuleType
 
 
 @runtime_checkable
-class PresetWithEnv(Preset, Protocol):
+class PresetWithEnv(Protocol):
     # env to be set, usually comes before %command%
     env: Env_
 
 
 @runtime_checkable
-class PresetWithWrapper(Preset, Protocol):
+class PresetWithWrapper(Protocol):
     # wrapper to be set, usually comes before %command%
     wrapper: Wrapper_
 
 
 @runtime_checkable
-class PresetWithArg(Preset, Protocol):
+class PresetWithArg(Protocol):
     # arg to be set, usually comes after %command%
     arg: Arg_
 
 
 @runtime_checkable
-class PresetWithKeyMapper(Preset, Protocol):
+class PresetWithKeyMapper(Protocol):
     key_mapper: KeyMapper
 
 
 @runtime_checkable
-class PresetConfigurable(Preset, Protocol):
+class PresetConfigurable(Protocol):
     # function receives everything needed to understand the current launch environment
     # use these infos to construct the final env and cmd to run the game
     def config(
@@ -69,6 +67,6 @@ class PresetConfigurable(Preset, Protocol):
 
 
 @runtime_checkable
-class PresetInitializable(Preset, Protocol):
+class PresetInitializable(Protocol):
     def init(self) -> None:
         ...
