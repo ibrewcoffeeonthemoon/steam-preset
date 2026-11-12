@@ -4,7 +4,7 @@ from typer import Exit
 
 from steam_preset.log import logger
 from steam_preset.registry import default as default_preset
-from steam_preset.types import (
+from steam_preset.registry.types import (
     Preset,
     PresetConfigurable,
     PresetWithArg,

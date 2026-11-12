@@ -6,7 +6,7 @@ from typing import Self
 from steam_preset import notify
 from steam_preset.log import logger
 from steam_preset.registry import Registry
-from steam_preset.types import (
+from steam_preset.registry.types import (
     PresetInitializable,
     PresetWithKeyMapper,
 )

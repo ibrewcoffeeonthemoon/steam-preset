@@ -5,7 +5,8 @@ import pkgutil
 from pathlib import Path
 
 from steam_preset.log import logger
-from steam_preset.types import Preset
+
+from .types import Preset
 
 
 class Registry:

@@ -1,5 +1,5 @@
 # default preset, apply to games without a preset file
-from steam_preset.types import *
+from .types import *
 
 env: Env_ = {
 }
