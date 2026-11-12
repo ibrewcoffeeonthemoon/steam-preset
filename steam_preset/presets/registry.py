@@ -12,7 +12,11 @@ class Registry:
     def __init__(self, presets_dir: Path) -> None:
         self.presets_dir = presets_dir
 
-    def _load_preset(self, key: str) -> Preset | None:
+    def get(self, preset_key: str | None) -> Preset | None:
+        # parse key
+        key = preset_key or os.environ.get('SteamAppId', 'default')
+        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
+
         # loop through the presets dir for python files
         for _, module_name, _ in pkgutil.iter_modules([str(self.presets_dir)]):
             file_path = self.presets_dir / f'{module_name}.py'
@@ -35,19 +39,5 @@ class Registry:
             except Exception as e:
                 logger.error(f'Unexpected error loading preset {file_path.name}: {e}')
 
-        return None
-
-    def get(self, preset_key: str | None) -> Preset | None:
-        # parse key
-        key = preset_key or os.environ.get('SteamAppId', 'default')
-        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
-
-        # load preset
-        preset = self._load_preset(key)
-        if preset is None:
-            logger.warning('No preset is loaded, using the default preset')
-        else:
-            logger.info(f'Preset loaded from registry: {preset=}')
-
         #
-        return preset
+        return None
