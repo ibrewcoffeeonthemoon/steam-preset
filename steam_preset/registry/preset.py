@@ -11,6 +11,12 @@ Cmd = list[str]
 KeyMap = dict[int, int]
 
 
+class KeyMapper(TypedDict):
+    source: str
+    target: NotRequired[str]
+    key_map: KeyMap
+
+
 def str_dict(d: dict[Any, Any]) -> dict[str, str]:
     return {str(k): str(v) for k, v in d.items()}
 
@@ -41,10 +47,6 @@ class Preset(BaseModel):
         default_factory=lambda: str_list(default.arg)
     )
 
-    class KeyMapper(TypedDict):
-        source: str
-        target: NotRequired[str]
-        key_map: KeyMap
     key_mapper: KeyMapper | None = None
 
     @runtime_checkable
