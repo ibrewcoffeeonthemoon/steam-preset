@@ -29,13 +29,10 @@ class Output(BaseModel):
 
 
 def focused_output() -> Output:
-    result = sh.run(
-        ['niri', 'msg', '-j', 'focused-output'],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    # use niri msg to fetch info of the focused output, fail on shell exit non zero
+    cmd = ['niri', 'msg', '-j', 'focused-output']
+    stdout = sh.run(cmd, capture_output=True, check=True).stdout
 
-    output = Output.model_validate_json(result.stdout)
-
+    # return Output as a validated model
+    output = Output.model_validate_json(stdout)
     return output
