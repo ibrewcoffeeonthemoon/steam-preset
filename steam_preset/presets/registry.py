@@ -10,47 +10,26 @@ from steam_preset.types import Preset
 
 class Registry:
     def __init__(self, presets_dir: Path) -> None:
-        #
-        self._data: dict[str, Preset] = {}
+        self.presets_dir = presets_dir
 
-        # iterate through all python modules in the presets package
-        if not presets_dir.is_dir():
-            return
+    def get(self, preset_key: str | None) -> Preset:
+        # parse key
+        if not (key := preset_key or os.environ.get('SteamAppId')):
+            raise ValueError('No key could be use to locate a preset, provide it via the --key flag')
+        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
 
-        # convert Path to string for pkgutil
-        for _, module_name, _ in pkgutil.iter_modules([str(presets_dir)]):
-            file_path = presets_dir / f'{module_name}.py'
-
-            # dynamically load the module from file path
-            try:
-                spec = importlib.util.spec_from_file_location(
-                    f'presets.{module_name}', file_path
-                )
+        # loop through the presets dir for python files
+        for _, module_name, _ in pkgutil.iter_modules([str(self.presets_dir)]):
+            # import the python file if it match the key
+            file_path = self.presets_dir / f'{module_name}.py'
+            # using double underscore as delimiter and look for key match in the filename directly
+            if key in module_name.split('__'):
+                spec = importlib.util.spec_from_file_location(f'presets.{module_name}', file_path)
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
                     logger.debug(f'Imported {module}')
+                    return module
 
-                    # register module by its key attribute if defined
-                    if isinstance(module, Preset):
-                        self._data[str(module.key)] = module
-                        logger.debug(f'Discovered {module}')
-            except ImportError as e:
-                logger.error(f'Failed to import preset {file_path.name}: {e}')
-            except Exception as e:
-                logger.error(f'Unexpected error loading preset {file_path.name}: {e}')
-
-    def get(self, preset_key: str | None) -> Preset | None:
-        # parse key
-        key = preset_key or os.environ.get('SteamAppId', 'default')
-        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
-
-        # load preset
-        preset = self._data.get(key)
-        if preset is None:
-            logger.warning('No preset is loaded, using the default preset')
-        else:
-            logger.info(f'Preset loaded from registry: {preset=}')
-
-        #
-        return preset
+        # if no preset is found, steam-preset launcher will crash and the game won't run
+        raise ImportError(f'Failed to import any preset for the key `{key}`')
