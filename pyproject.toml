@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "steam-preset"
-version = "1.0.1"
+version = "1.0.2"
 description = "per-game launch option and environment manager for steam"
 authors = [
     { name = "Quantum Snowball", email = "quantum.snowball@gmail.com" }

@@ -374,7 +374,7 @@ wheels = [
 
 [[package]]
 name = "steam-preset"
-version = "1.0.1"
+version = "1.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "evdev" },
@@ -390,7 +390,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "evdev" },
-    { name = "pydantic", specifier = ">=2.14.3" },
+    { name = "pydantic" },
     { name = "typer" },
 ]
 
