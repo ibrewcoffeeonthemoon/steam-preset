@@ -6,10 +6,6 @@ from typing import Self
 from steam_preset import notify
 from steam_preset.log import logger
 from steam_preset.registry import Registry
-from steam_preset.registry.types import (
-    PresetInitializable,
-    PresetWithKeyMapper,
-)
 
 from . import artwork, inputs
 from .spec import Spec
@@ -34,13 +30,13 @@ class Game:
 
     def _run_key_mapper(self) -> None:
         # run the key mapper if exists
-        if isinstance(self._preset, PresetWithKeyMapper):
+        if self._preset.key_mapper is not None:
             self._key_mapper_proc = inputs.remap(self._preset.key_mapper)
             logger.info(f'{self._preset.key_mapper=}')
 
     def _run_init(self) -> None:
         # run the init script if exists
-        if isinstance(self._preset, PresetInitializable):
+        if self._preset.init is not None:
             logger.info(f'running preset init function ...')
             self._preset.init()
 
