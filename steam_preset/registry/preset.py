@@ -1,14 +1,16 @@
+from pathlib import Path
 from typing import Annotated, Any, NotRequired, Protocol, TypedDict, runtime_checkable
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
 from . import default
 
-__all__ = ['Env', 'Wrapper', 'Arg', 'Cmd', 'KeyMap', 'KeyMapper', 'Preset']
+__all__ = ['Env', 'Wrapper', 'Arg', 'Cmd', 'Env_', 'Wrapper_', 'Arg_', 'Cmd_', 'KeyMap', 'KeyMapper', 'Preset']
 
-Env = dict[str, str]
-Wrapper = list[str]
-Arg = list[str]
+# raw types
+Env = dict[str, str | int | Path]
+Wrapper = list[str | int | Path]
+Arg = list[str | int | Path]
 Cmd = list[str]
 KeyMap = dict[int, int]
 
@@ -17,6 +19,13 @@ class KeyMapper(TypedDict):
     source: str
     target: NotRequired[str]
     key_map: KeyMap
+
+
+# validated types
+Env_ = dict[str, str]
+Wrapper_ = list[str]
+Arg_ = list[str]
+Cmd_ = Cmd
 
 
 def str_dict(d: dict[Any, Any]) -> dict[str, str]:
@@ -35,17 +44,17 @@ class Preset(BaseModel):
     )
 
     # env to be set, usually comes before %command%
-    env: Annotated[Env, BeforeValidator(str_dict)] = Field(
+    env: Annotated[Env_, BeforeValidator(str_dict)] = Field(
         default_factory=lambda: str_dict(default.env)
     )
 
     # wrapper to be set, usually comes before %command%
-    wrapper: Annotated[Wrapper, BeforeValidator(str_list)] = Field(
+    wrapper: Annotated[Wrapper_, BeforeValidator(str_list)] = Field(
         default_factory=lambda: str_list(default.wrapper)
     )
 
     # arg to be set, usually comes after %command%
-    arg: Annotated[Arg, BeforeValidator(str_list)] = Field(
+    arg: Annotated[Arg_, BeforeValidator(str_list)] = Field(
         default_factory=lambda: str_list(default.arg)
     )
 
@@ -57,12 +66,12 @@ class Preset(BaseModel):
         # use these infos to construct the final env and cmd to run the game
         def __call__(
             self,
-            steam_env: Env,
-            steam_cmd: Cmd,
-            preset_env: Env,
-            preset_wrapper: Wrapper,
-            preset_arg: Arg,
-        ) -> tuple[Env, Cmd]:
+            steam_env: Env_,
+            steam_cmd: Cmd_,
+            preset_env: Env_,
+            preset_wrapper: Wrapper_,
+            preset_arg: Arg_,
+        ) -> tuple[Env_, Cmd_]:
             ...
     config: ConfigFunc | None = None
 
