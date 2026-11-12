@@ -1,12 +1,11 @@
 # default preset, apply to games without a preset file
-from .types import *
 
-env: Env_ = {
+env: dict = {
 }
 
-wrapper: Wrapper_ = [
+wrapper: list = [
     'mangohud',
 ]
 
-arg: Arg_ = [
+arg: list = [
 ]
