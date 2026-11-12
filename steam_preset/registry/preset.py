@@ -1,4 +1,4 @@
-from typing import Annotated, Any, NotRequired, Protocol, TypedDict
+from typing import Annotated, Any, NotRequired, Protocol, TypedDict, runtime_checkable
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
@@ -21,7 +21,10 @@ def str_list(l: list[Any]) -> list[str]:
 
 class Preset(BaseModel):
     # allow input to be a ModuleType
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True,
+    )
 
     # env to be set, usually comes before %command%
     env: Annotated[Env, BeforeValidator(str_dict)] = Field(
@@ -44,7 +47,8 @@ class Preset(BaseModel):
         key_map: KeyMap
     key_mapper: KeyMapper | None = None
 
-    class Config(Protocol):
+    @runtime_checkable
+    class ConfigFunc(Protocol):
         # function receives everything needed to understand the current launch environment
         # use these infos to construct the final env and cmd to run the game
         def __call__(
@@ -56,9 +60,10 @@ class Preset(BaseModel):
             preset_arg: Arg,
         ) -> tuple[Env, Cmd]:
             ...
-    config: Config | None = None
+    config: ConfigFunc | None = None
 
-    class Init(Protocol):
+    @runtime_checkable
+    class InitFunc(Protocol):
         def __call__(self) -> None:
             ...
-    init: Init | None = None
+    init: InitFunc | None = None
