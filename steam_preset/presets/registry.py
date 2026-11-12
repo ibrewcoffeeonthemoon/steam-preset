@@ -14,7 +14,8 @@ class Registry:
 
     def get(self, preset_key: str | None) -> Preset:
         # parse key
-        key = preset_key or os.environ.get('SteamAppId', 'default')
+        if not (key := preset_key or os.environ.get('SteamAppId')):
+            raise ValueError('No key could be use to locate a preset, provide it via the --key flag')
         logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
 
         # loop through the presets dir for python files
@@ -23,9 +24,7 @@ class Registry:
             file_path = self.presets_dir / f'{module_name}.py'
             # using double underscore as delimiter and look for key match in the filename directly
             if key in module_name.split('__'):
-                spec = importlib.util.spec_from_file_location(
-                    f'presets.{module_name}', file_path
-                )
+                spec = importlib.util.spec_from_file_location(f'presets.{module_name}', file_path)
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
