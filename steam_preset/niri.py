@@ -1,17 +1,31 @@
-import json
 import subprocess as sh
-from dataclasses import dataclass
-from typing import cast
+
+from pydantic import BaseModel
 
 
-@dataclass
-class Output:
+class Output(BaseModel):
     name: str
     make: str
     model: str
-    width: str
-    height: str
-    refresh_rate: str
+    current_mode: int
+
+    class Mode(BaseModel):
+        width: int
+        height: int
+        refresh_rate: int
+    modes: list[Mode]
+
+    @property
+    def width(self) -> str:
+        return str(self.modes[self.current_mode].width)
+
+    @property
+    def height(self) -> str:
+        return str(self.modes[self.current_mode].height)
+
+    @property
+    def refresh_rate(self) -> str:
+        return str(self.modes[self.current_mode].refresh_rate)
 
 
 def focused_output() -> Output:
@@ -21,15 +35,7 @@ def focused_output() -> Output:
         text=True,
         check=True,
     )
-    data: dict = json.loads(result.stdout)
-    mode_id = cast(int, data.get('current_mode'))
-    modes = cast(list[dict], data.get('modes'))
-    mode = modes[mode_id]
-    return Output(
-        name=str(data.get('name', '')),
-        make=str(data.get('make', '')),
-        model=str(data.get('model', '')),
-        width=str(mode.get('width')),
-        height=str(mode.get('height')),
-        refresh_rate=str(mode.get('refresh_rate')),
-    )
+
+    output = Output.model_validate_json(result.stdout)
+
+    return output
