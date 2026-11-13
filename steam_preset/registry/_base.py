@@ -17,7 +17,7 @@ class Registry:
 
     def get(self, preset_key: str | None) -> Preset:
         # parse key
-        if not (key := preset_key or os.environ.get('SteamAppId')):
+        if not (key := preset_key or os.environ.get('SteamAppId', 'default')):
             raise ValueError('No key could be use to locate a preset, provide it via the --key flag')
         logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
 
