@@ -3,8 +3,6 @@ from typing import Annotated, Any, NotRequired, Protocol, TypedDict, runtime_che
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
-from . import default
-
 __all__ = ['Env', 'Wrapper', 'Arg', 'Cmd', 'Env_', 'Wrapper_', 'Arg_', 'Cmd_', 'KeyMap', 'KeyMapper', 'Preset']
 
 # raw types
@@ -44,19 +42,13 @@ class Preset(BaseModel):
     )
 
     # env to be set, usually comes before %command%
-    env: Annotated[Env_, BeforeValidator(str_dict)] = Field(
-        default_factory=lambda: str_dict(default.env)
-    )
+    env: Annotated[Env_, BeforeValidator(str_dict)] = Field(default_factory=dict)
 
     # wrapper to be set, usually comes before %command%
-    wrapper: Annotated[Wrapper_, BeforeValidator(str_list)] = Field(
-        default_factory=lambda: str_list(default.wrapper)
-    )
+    wrapper: Annotated[Wrapper_, BeforeValidator(str_list)] = Field(default_factory=list)
 
     # arg to be set, usually comes after %command%
-    arg: Annotated[Arg_, BeforeValidator(str_list)] = Field(
-        default_factory=lambda: str_list(default.arg)
-    )
+    arg: Annotated[Arg_, BeforeValidator(str_list)] = Field(default_factory=list)
 
     key_mapper: KeyMapper | None = None
 
