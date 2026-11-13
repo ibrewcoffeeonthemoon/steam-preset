@@ -1,4 +1,3 @@
-import importlib
 import importlib.util
 import os
 import pkgutil
@@ -15,25 +14,39 @@ class Registry:
     def __init__(self, presets_dir: Path) -> None:
         self.presets_dir = presets_dir
 
+    def _load(self, module_name: str) -> Preset | None:
+        file_path = self.presets_dir / f'{module_name}.py'
+        spec = importlib.util.spec_from_file_location(f'presets.{module_name}', file_path)
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            logger.info(f'Imported {module}')
+            preset = Preset.model_validate(vars(module))
+            return preset
+        return None
+
+    def _search_for(self, key: str, *, delimiter: str = '__') -> Preset | None:
+        for _, module_name, _ in pkgutil.iter_modules([str(self.presets_dir)]):
+            if key in module_name.split(delimiter):
+                if (preset := self._load(module_name)):
+                    return preset
+        return None
+
     def get(self, preset_key: str | None) -> Preset:
         # parse key
-        if not (key := preset_key or os.environ.get('SteamAppId', 'default')):
-            raise ValueError('No key could be use to locate a preset, provide it via the --key flag')
+        key = preset_key or os.environ.get('SteamAppId')
         logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
 
-        # loop through the presets dir for python files
-        for _, module_name, _ in pkgutil.iter_modules([str(self.presets_dir)]):
-            # import the python file if it match the key
-            file_path = self.presets_dir / f'{module_name}.py'
-            # using double underscore as delimiter and look for key match in the filename directly
-            if key in module_name.split('__'):
-                spec = importlib.util.spec_from_file_location(f'presets.{module_name}', file_path)
-                if spec and spec.loader:
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
-                    logger.debug(f'Imported {module}')
-                    preset = Preset.model_validate(vars(module))
-                    return preset
+        # try with primary key first
+        if key:
+            if (preset := self._search_for(key)):
+                return preset
+
+        # fallback to 'default' preset if primary key didn't match anything or is None
+        if key != 'default':
+            logger.warning(f'No preset found for {key=}, falling back to `default`')
+            if (preset := self._search_for('default')):
+                return preset
 
         # if no preset is found, steam-preset launcher will crash and the game won't run
         raise ImportError(f'Failed to import any preset for the key `{key}`')
