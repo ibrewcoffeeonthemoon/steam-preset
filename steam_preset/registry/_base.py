@@ -33,20 +33,22 @@ class Registry:
         return None
 
     def get(self, preset_key: str | None) -> Preset:
-        # parse key
-        key = preset_key or os.environ.get('SteamAppId')
-        logger.debug(f'{key=} (source: {"--key flag" if preset_key else "env SteamAppId"})')
-
-        # try with primary key first
-        if key:
-            if (preset := self._search_for(key)):
+        # explicit --key flag: fail fast if invalid, never fall back to default
+        if preset_key:
+            logger.debug(f'{preset_key=} (source: --key flag)')
+            if preset := self._search_for(preset_key):
                 return preset
+            raise ImportError(f'Invalid {preset_key=}: no matching preset found')
 
-        # fallback to 'default' preset if primary key didn't match anything or is None
-        if key != 'default':
-            logger.warning(f'No preset found for {key=}, falling back to `default`')
-            if (preset := self._search_for('default')):
+        # automatic SteamAppId lookup: fall back to 'default' on miss (e.g. non-steam games)
+        if steam_app_id := os.environ.get('SteamAppId'):
+            logger.debug(f'{steam_app_id=} (source: env SteamAppId)')
+            if preset := self._search_for(steam_app_id):
                 return preset
+            logger.warning(f'No preset found for {steam_app_id=}, falling back to `default`')
 
-        # if no preset is found, steam-preset launcher will crash and the game won't run
-        raise ImportError(f'Failed to import any preset for the key `{key}`')
+        # fallback to 'default' preset
+        if preset := self._search_for('default'):
+            return preset
+
+        raise ImportError('Failed to import any preset (and no `default` preset found)')
