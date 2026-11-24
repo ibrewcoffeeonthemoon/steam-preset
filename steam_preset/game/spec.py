@@ -3,14 +3,7 @@ import os
 from typer import Exit
 
 from steam_preset.log import logger
-from steam_preset.presets import default as default_preset
-from steam_preset.types import (
-    Preset,
-    PresetConfigurable,
-    PresetWithArg,
-    PresetWithEnv,
-    PresetWithWrapper,
-)
+from steam_preset.registry import Preset
 
 
 class Spec:
@@ -24,23 +17,20 @@ class Spec:
             logger.error('No %command% detected. Use `steam-preset %command%` as launch options.')
             raise Exit(code=1)
 
-        # load preset extras
-        preset_env_ = preset.env.copy() if isinstance(preset, PresetWithEnv) else default_preset.env
-        preset_env = {str(k): str(v) for k, v in preset_env_.items()}
-        preset_wrapper_ = preset.wrapper.copy() if isinstance(preset, PresetWithWrapper) else default_preset.wrapper
-        preset_wrapper = [str(v) for v in preset_wrapper_]
-        preset_arg_ = preset.arg.copy() if isinstance(preset, PresetWithArg) else default_preset.arg
-        preset_arg = [str(v) for v in preset_arg_]
-        logger.info(f'{preset_env=}')
-        logger.info(f'{preset_wrapper=}')
-        logger.info(f'{preset_arg=}')
+        # load preset
+        if preset is None:
+            logger.error('No preset is loaded.')
+            raise Exit(code=1)
+        logger.info(f'{preset.env=}')
+        logger.info(f'{preset.wrapper=}')
+        logger.info(f'{preset.arg=}')
 
         # construct the final version of cmd and env
-        if isinstance(preset, PresetConfigurable):
+        if preset.config is not None:
             steam_env = os.environ.copy()
-            self.env, self.cmd = preset.config(steam_env, steam_cmd, preset_env, preset_wrapper, preset_arg)
+            self.env, self.cmd = preset.config(steam_env, steam_cmd, preset.env, preset.wrapper, preset.arg)
         else:
-            self.env = os.environ | preset_env
-            self.cmd = preset_wrapper + steam_cmd + preset_arg
+            self.env = os.environ | preset.env
+            self.cmd = preset.wrapper + steam_cmd + preset.arg
         logger.debug(f'{self.env=}')
         logger.info(f'{self.cmd=}')

@@ -2,6 +2,8 @@ import subprocess as sh
 
 from pydantic import BaseModel
 
+__all__ = ['focused_output']
+
 
 class Output(BaseModel):
     name: str
